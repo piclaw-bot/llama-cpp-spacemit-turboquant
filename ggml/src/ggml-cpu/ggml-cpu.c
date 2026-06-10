@@ -1312,6 +1312,22 @@ void ggml_compute_forward_mul_mat(
     ggml_from_float_t        const from_float           = type_traits_cpu[vec_dot_type].from_float;
     int64_t                  const vec_dot_num_rows     = type_traits_cpu[src0->type].nrows;
 
+#if defined(__riscv) || defined(__riscv__)
+    if (ith == 0 && getenv("SPACEMIT_PROFILE_FALLBACK")) {
+        fprintf(stderr,
+                "SPACEMIT_FALLBACK_MUL_MAT dst=%s src0=%s src1=%s type0=%s type1=%s vecdot=%s nrows=%" PRId64
+                " ne0=%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64
+                " ne1=%" PRId64 ",%" PRId64 ",%" PRId64 ",%" PRId64
+                " nb0=%zu,%zu,%zu,%zu nb1=%zu,%zu,%zu,%zu\n",
+                dst->name, src0->name, src1->name, ggml_type_name(src0->type), ggml_type_name(src1->type),
+                ggml_type_name(vec_dot_type), vec_dot_num_rows,
+                src0->ne[0], src0->ne[1], src0->ne[2], src0->ne[3],
+                src1->ne[0], src1->ne[1], src1->ne[2], src1->ne[3],
+                src0->nb[0], src0->nb[1], src0->nb[2], src0->nb[3],
+                src1->nb[0], src1->nb[1], src1->nb[2], src1->nb[3]);
+    }
+#endif
+
     GGML_ASSERT(ne0 == ne01);
     GGML_ASSERT(ne1 == ne11);
     GGML_ASSERT(ne2 == ne12);
