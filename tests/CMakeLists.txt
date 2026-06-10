@@ -304,3 +304,7 @@ if (TARGET gguf-model-data)
     target_link_libraries(export-graph-ops PRIVATE gguf-model-data)
     target_compile_definitions(export-graph-ops PRIVATE LLAMA_HF_FETCH)
 endif()
+
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "riscv64")
+    llama_build(test-spacemit-q4k-correctness.cpp)
+endif()
