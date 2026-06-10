@@ -27,6 +27,7 @@
 #include <cerrno>
 #include <cmath>
 #include <cstdio>  // for GGML_ASSERT
+#include <cstdlib>
 #include <stdexcept>
 #include <thread>
 // clang-format off
@@ -1243,6 +1244,7 @@ static const tensor_traits<block_q4_1, 32, 32>  q4_1_32x32_q8_0;
 static const tensor_traits<block_q4_0, 256, 32> q4_0_32x256_q8_0;
 static const tensor_traits<block_q4_1, 256, 32> q4_1_32x256_q8_0;
 static const tensor_traits<block_q4_K, 32, 32>  q4_k_32x32_q8_0;
+static const tensor_traits<block_q4_K, 256, 32> q4_k_32x256_q8_0;
 static const tensor_traits<block_q6_K, 32, 32>  q6_k_32x32_q8_0;
 static const tensor_traits<block_q8_0, 32, 32>  q8_0_32x32_q8_0;
 static const tensor_traits<block_mxfp4, 32, 32> mxfp4_32x32_q8_0;
@@ -1318,6 +1320,11 @@ static const ggml::cpu::tensor_traits * ggml_riscv64_spacemit_get_optimal_repack
         case GGML_TYPE_Q4_K:
             {
 #if defined(RISCV64_SPACEMIT_IME2)
+                if (std::getenv("SPACEMIT_EXPERIMENTAL_Q4K_32X256") && cur->ne[1] % 32 == 0 &&
+                    cur->ne[0] % 256 == 0 && (ggml::cpu::riscv64_spacemit::global_spine_env_info.use_ime2)) {
+                    return &ggml::cpu::riscv64_spacemit::q4_k_32x256_q8_0;
+                }
+
                 if (cur->ne[1] % 32 == 0 && (ggml::cpu::riscv64_spacemit::global_spine_env_info.use_ime2)) {
                     return &ggml::cpu::riscv64_spacemit::q4_k_32x32_q8_0;
                 }
